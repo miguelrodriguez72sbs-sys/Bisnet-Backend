@@ -24,4 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
     //estadias
     Route::get('/estadias',      [EstadiaController::class, 'index']);
     Route::get('/estadias/{id}', [EstadiaController::class, 'show']);
+    });
+    //rutas de filtro de usuarios para estadias
+    Route::middleware(['auth:sanctum', 'correo.institucional'])->group(function () {
+    Route::get('/estadias',      [EstadiaController::class, 'index']);
+    Route::get('/estadias/{id}', [EstadiaController::class, 'show']);
 });
