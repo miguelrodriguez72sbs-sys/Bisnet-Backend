@@ -1,23 +1,16 @@
 // GameScene.js — Phaser 3
-// Coordenadas calculadas y verificadas:
-//   Canvas: 920 x 280
-//   Suelo: franja y=238..280 (42px de alto)
-//   Robot en reposo: pie en y=216 (22px sobre el suelo), origen(0.5,1)
-//   Pino pie: y=222 (16px sobre suelo), origen(0,1)
-//   Bonsai pie: y=222, origen(0,1)
 
 class GameScene extends Phaser.Scene {
 
     constructor() { super({ key: 'GameScene' }); }
 
     initVars() {
-        // Física manual (igual que procesamiento.js original)
-        this.sueloY            = 22;      // bottom del robot cuando está en el suelo
+        this.sueloY            = 0;
         this.velY              = 0;
         this.impulso           = 900;
         this.gravedad          = 2500;
-        this.robotPosX         = 42;
-        this.robotPosY         = 22;      // empieza en el suelo
+        this.robotPosX         = 0;
+        this.robotPosY         = 0;
 
         this.velEscenario      = 1280 / 3;
         this.velocidadDelJuego = 1;
@@ -25,6 +18,7 @@ class GameScene extends Phaser.Scene {
         this.varPuntajePalomas   = 0;
         this.varPuntajeDeErrores = 0;
         this.detenido  = false;
+        this.pausado   = false;
         this.saltando  = false;
 
         this.tiempoHastaPaloma    = 2;
@@ -63,9 +57,10 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('lechuza', 'img/lechuza.png', {
-            frameWidth: 84, frameHeight: 84
+            frameWidth: 216, frameHeight: 288,
         });
         this.load.image('suelo',  'img/suelo.png');
+        this.load.image('fondo',  'img/fondo_nuevo.png');
         this.load.image('pino',   'img/pino.png');
         this.load.image('bonsai', 'img/bonsai.png');
         this.load.image('nube',   'img/nube.png');
@@ -81,27 +76,18 @@ class GameScene extends Phaser.Scene {
         this.initVars();
 
         // ── Fondo ──────────────────────────────────────────────────
-        this.fondoBase = this.add.rectangle(0, 0, 920, 280, 0xffe2d1)
+        this.fondoBase = this.add.image(0, 0, 'fondo')
             .setOrigin(0, 0).setDepth(0);
 
-        // Gradiente cielo (tiras horizontales con alpha decreciente)
-        const g = this.add.graphics().setDepth(0);
-        for (let i = 0; i < 238; i++) {
-            const a = Math.max(0, (1 - i / 238) * 0.5);
-            g.fillStyle(0xb7d6c7, a);
-            g.fillRect(0, i, 920, 1);
-        }
-
         // ── Suelo ──────────────────────────────────────────────────
-        // y=238, altura=42, origen top-left
         this.imgSuelo = this.add.tileSprite(0, 238, 920, 42, 'suelo')
-            .setOrigin(0, 0).setDepth(1);
+            .setOrigin(0, 0).setDepth(2);
 
         // ── Animaciones ────────────────────────────────────────────
         if (!this.anims.exists('correr')) {
             this.anims.create({
                 key: 'correr',
-                frames: this.anims.generateFrameNumbers('lechuza', { frames: [1, 2] }),
+                frames: this.anims.generateFrameNumbers('lechuza', { frames: [0, 1, 2, 3] }),
                 frameRate: 8, repeat: -1
             });
         }
@@ -114,21 +100,17 @@ class GameScene extends Phaser.Scene {
         }
 
         // ── Robot ──────────────────────────────────────────────────
-        // PIE del robot en reposo: y = 238 - 22 = 216
-        // Origen (0.5, 1) → ancla en el centro-abajo del sprite
-        // x = 42 (left CSS) + 42 (mitad del ancho 84) = 84
-        this.robot = this.add.sprite(84, 216, 'lechuza')
-            .setOrigin(0.5, 1).setDepth(3);
+        this.robot = this.add.sprite(84, 280, 'lechuza')
+            .setOrigin(0.5, 1).setDepth(3).setScale(0.5);
+        this.robot.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         this.robot.play('correr');
 
         // ── UI ─────────────────────────────────────────────────────
-        // Panel fondo izquierdo (solo para los 3 elementos de UI)
         this.add.rectangle(0, 0, 205, 74, 0x000000, 0.4)
             .setOrigin(0, 0).setDepth(8);
 
         const f = { fontFamily: 'Verdana', fontStyle: 'bold' };
 
-        // Barra de vida: y=5, ancho máx 180px
         this.add.rectangle(6, 5, 180, 14, 0x78a8d4)
             .setOrigin(0, 0).setDepth(9);
         this.barraRelleno = this.add.rectangle(6, 5, 90, 14, 0x1b6c0e)
@@ -143,16 +125,38 @@ class GameScene extends Phaser.Scene {
             'Desaciertos: 0', { ...f, fontSize: '14px', color: '#ffaaaa' })
             .setDepth(9);
 
-        // Panel y texto de la palabra (esquina superior derecha)
-        this.panelPalabra = this.add.rectangle(920, 0, 120, 26, 0x000000, 0.4)
-            .setOrigin(1, 0).setDepth(8);
-        this.txtPalabra = this.add.text(914, 5, '',
-            { ...f, fontSize: '14px', color: '#ffffff' })
-            .setOrigin(1, 0).setDepth(9);
+        // ── Palabra ────────────────────────────────────────────────
+        this.panelPalabra = this.add.rectangle(460, 0, 200, 36, 0x000000, 0.4)
+            .setOrigin(0.5, 0).setDepth(8);
+        this.txtPalabra = this.add.text(460, 6, '',
+            { ...f, fontSize: '22px', color: '#ffffff' })
+            .setOrigin(0.5, 0).setDepth(9);
+
+        // ── Botones pausa y reinicio ───────────────────────────────
+        this.btnReinicio = this.add.text(840, 8, '🔄',
+            { fontSize: '22px', backgroundColor: '#00000077', padding: { x: 6, y: 4 } })
+            .setDepth(15).setInteractive({ useHandCursor: true });
+        this.btnReinicio.on('pointerdown', () => this.Reiniciar());
+        this.btnReinicio.on('pointerover', () => this.btnReinicio.setAlpha(0.7));
+        this.btnReinicio.on('pointerout',  () => this.btnReinicio.setAlpha(1));
+
+        this.btnPausa = this.add.text(880, 8, '⏸',
+            { fontSize: '22px', backgroundColor: '#00000077', padding: { x: 6, y: 4 } })
+            .setDepth(15).setInteractive({ useHandCursor: true });
+        this.btnPausa.on('pointerdown', () => this.TogglePausa());
+        this.btnPausa.on('pointerover', () => this.btnPausa.setAlpha(0.7));
+        this.btnPausa.on('pointerout',  () => this.btnPausa.setAlpha(1));
+
+        // ── Texto pausa ────────────────────────────────────────────
+        this.txtPausa = this.add.text(460, 130, '⏸  PAUSA',
+            { ...f, fontSize: '36px', color: '#ffffff',
+              backgroundColor: '#00000099', padding: { x: 24, y: 12 } })
+            .setOrigin(0.5).setDepth(20).setVisible(false);
 
         // ── Texto fin del juego ────────────────────────────────────
         this.txtFin = this.add.text(460, 140, 'Finalizó el juego',
-            { ...f, fontSize: '30px', color: '#7e928b' })
+            { ...f, fontSize: '30px', color: '#ffffff',
+              backgroundColor: '#00000099', padding: { x: 20, y: 10 } })
             .setOrigin(0.5).setDepth(20).setVisible(false);
 
         // ── Sonidos ────────────────────────────────────────────────
@@ -166,16 +170,15 @@ class GameScene extends Phaser.Scene {
         // ── Input ──────────────────────────────────────────────────
         this.input.keyboard.on('keydown-UP',    () => this.Saltar());
         this.input.keyboard.on('keydown-SPACE', () => this.Saltar());
+        this.input.keyboard.on('keydown-P',     () => this.TogglePausa());
+        this.input.keyboard.on('keydown-R',     () => this.Reiniciar());
 
         this.ConstruirPalabra();
         this.actualizarBarra();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  UPDATE
-    // ═══════════════════════════════════════════════════════════
     update(time, delta) {
-        if (this.detenido) return;
+        if (this.detenido || this.pausado) return;
         const dt = delta / 1000;
 
         this.MoverElRobot(dt);
@@ -195,10 +198,6 @@ class GameScene extends Phaser.Scene {
         this.velY -= this.gravedad * dt;
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  LÓGICA
-    // ═══════════════════════════════════════════════════════════
-
     rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
     ConstruirPalabra() {
@@ -206,11 +205,11 @@ class GameScene extends Phaser.Scene {
         this.varFormulaEnTexto = p.ingles;
         this.varResultado      = p.espanol;
         this.txtPalabra.setText(p.ingles);
-        this.panelPalabra.width = this.txtPalabra.width + 14;
+        this.panelPalabra.width = this.txtPalabra.width + 30;
     }
 
     Saltar() {
-        if (this.robotPosY === this.sueloY && !this.detenido) {
+        if (this.robotPosY === this.sueloY && !this.detenido && !this.pausado) {
             this.saltando = true;
             this.velY     = this.impulso;
             this.sndBrinca.stop();
@@ -218,23 +217,37 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    TogglePausa() {
+        if (this.detenido) return;
+        this.pausado = !this.pausado;
+        this.btnPausa.setText(this.pausado ? '▶' : '⏸');
+        this.txtPausa.setVisible(this.pausado);
+        if (this.pausado) {
+            this.sndFondo.pause();
+        } else {
+            this.sndFondo.resume();
+        }
+    }
+
+    Reiniciar() {
+        this.sndFondo.stop();
+        this.scene.restart();
+    }
+
     MoverElRobot(dt) {
         this.robotPosY += this.velY * dt;
-        if (this.robotPosY < this.sueloY) {
-            this.robotPosY = this.sueloY;
+
+        if (this.robotPosY < 0) {
+            this.robotPosY = 0;
             this.velY      = 0;
             if (this.saltando) this.robot.play('correr');
             this.saltando  = false;
         }
-        // robotPosY = cuánto sube el PIE por encima del suelo
-        // suelo superior = y=238
-        // pie del robot en Phaser = 238 - robotPosY
-        this.robot.y = 238 - this.robotPosY;
+
+        this.robot.y = 280 - this.robotPosY;
     }
 
-    // ── Nubes ────────────────────────────────────────────────────
     CrearNube() {
-        // Nubes en el cielo: entre y=15 y y=110 (bien arriba)
         const y = this.rnd(15, 110);
         const nube = this.add.image(970, y, 'nube')
             .setOrigin(0, 0).setDepth(0);
@@ -248,13 +261,18 @@ class GameScene extends Phaser.Scene {
     CrearObstaculo() {
         const esBonsai = Math.random() > 0.5;
         const key      = esBonsai ? 'bonsai' : 'pino';
-        // Pie del árbol: 16px sobre el suelo → y = 238 - 16 = 222
-        // Origen (0,1): el punto de anclaje es la esquina inferior-izquierda
-        const obs = this.add.image(970, 222, key)
-            .setOrigin(0, 1).setDepth(2);
+        const alturaY  = esBonsai ? 242 : 250;
+
+        const obs = this.add.image(970, alturaY, key)
+            .setOrigin(0, 1).setDepth(1);
+
         obs.posX     = 920;
         obs.esPaloma = false;
+        obs.width    = obs.displayWidth;
+        obs.height   = obs.displayHeight;
+
         this.conjuntoDeObstaculos.push(obs);
+
         this.tiempoHastaObstaculo = this.tiempoObstaculoMin +
             Math.random() * (this.tiempoObstaculoMax - this.tiempoObstaculoMin) / this.velocidadDelJuego;
     }
@@ -271,25 +289,21 @@ class GameScene extends Phaser.Scene {
             texto = inc;
         }
 
-        // Paloma vuela entre 40 y 160px sobre el suelo
-        // Pie de la paloma en Phaser: 238 - bottomPx
         const bottomPx = this.rnd(40, 160);
-        const pieY     = 238 - bottomPx;   // ej: bottom=80 → pieY=158
+        const pieY     = 238 - bottomPx;
 
-        // imagen origen (0.5, 1): ancla pie-centro
         const img = this.add.image(944, pieY, 'paloma')
-            .setOrigin(0.5, 1).setDepth(2);
+            .setOrigin(0.5, 1).setDepth(3);
 
-        // etiqueta encima de la paloma
         const txt = this.add.text(944, pieY - 50, texto, {
             fontFamily: 'Verdana', fontSize: '13px', fontStyle: 'bold',
             color: '#111111', stroke: '#ffffff', strokeThickness: 3
-        }).setOrigin(0.5, 1).setDepth(3);
+        }).setOrigin(0.5, 1).setDepth(4);
 
         this.conjuntoDeObstaculos.push({
             posX: 920, esPaloma: true, texto,
-            img, txt,
-            pieY,           // Y del pie (fija, no cambia)
+            img, txt, pieY,
+            actualY: pieY,
             width: 48, height: 48
         });
 
@@ -297,11 +311,9 @@ class GameScene extends Phaser.Scene {
             Math.random() * (this.tiempoPalomaMax - this.tiempoPalomaMin) / this.velocidadDelJuego;
     }
 
-    // ── Mover todo ───────────────────────────────────────────────
     MoverObjetos(dt) {
         const desp = this.velEscenario * dt * this.velocidadDelJuego;
 
-        // Nubes (más lentas)
         for (let i = this.conjuntoDeNubes.length - 1; i >= 0; i--) {
             const n = this.conjuntoDeNubes[i];
             n.posX -= desp * 0.5;
@@ -309,19 +321,29 @@ class GameScene extends Phaser.Scene {
             if (n.posX < -92) { n.destroy(); this.conjuntoDeNubes.splice(i, 1); }
         }
 
-        // Obstáculos y palomas
         for (let i = this.conjuntoDeObstaculos.length - 1; i >= 0; i--) {
             const o = this.conjuntoDeObstaculos[i];
-            o.posX -= desp;
 
             if (o.esPaloma) {
-                o.img.x = o.posX + 24;
-                o.txt.x = o.posX + 24;
-                if (o.posX < -60) {
+                o.posX -= desp;
+
+                const tiempo = this.time.now * 0.005;
+                const desvY  = Math.sin(tiempo + i) * 15;
+
+                o.img.x = o.posX;
+                o.img.y = o.pieY + desvY;
+
+                o.txt.x = o.posX;
+                o.txt.y = (o.pieY + desvY) - 50;
+
+                o.actualY = o.pieY + desvY;
+
+                if (o.posX < -100) {
                     o.img.destroy(); o.txt.destroy();
                     this.conjuntoDeObstaculos.splice(i, 1);
                 }
             } else {
+                o.posX -= desp;
                 o.x = o.posX;
                 if (o.posX < -o.width) {
                     o.destroy();
@@ -331,10 +353,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // ── Colisión ─────────────────────────────────────────────────
     DetectarColision() {
-        // Robot: origen (0.5,1), pie en this.robot.y
-        // left = 84 - 42 = 42,  right = 84 + 42 = 126
         const rPie    = this.robot.y;
         const rTop    = rPie  - 84;
         const rLeft   = 42;
@@ -346,16 +365,14 @@ class GameScene extends Phaser.Scene {
 
             let oL, oT, oR, oB;
             if (o.esPaloma) {
-                // origen (0.5,1): pie en (posX+24, pieY)
                 oL = o.posX;      oR = o.posX + 48;
-                oB = o.pieY;      oT = o.pieY - 48;
+                oB = o.actualY || o.pieY;
+                oT = (o.actualY || o.pieY) - 48;
             } else {
-                // origen (0,1): pie en (posX, y=222)
                 oL = o.posX;      oR = o.posX + o.width;
                 oB = o.y;         oT = o.y - o.height;
             }
 
-            // paddingTop:10, paddingRight:30, paddingBottom:15, paddingLeft:20
             const choca = !(
                 (rPie  - 15) < oT  ||
                 (rTop  + 10) > oB  ||
@@ -397,9 +414,9 @@ class GameScene extends Phaser.Scene {
         o.img.destroy(); o.txt.destroy();
         this.conjuntoDeObstaculos.splice(idx, 1);
 
-        if      (this.varPuntajePalomas === 10) { this.velocidadDelJuego = 1.2; this.cambiarFondo(0xffdf9e); }
-        else if (this.varPuntajePalomas === 25) { this.velocidadDelJuego = 1.4; this.cambiarFondo(0xc86158); }
-        else if (this.varPuntajePalomas === 50) { this.velocidadDelJuego = 1.7; this.cambiarFondo(0xaca8c7); }
+        if      (this.varPuntajePalomas === 10) { this.velocidadDelJuego = 1.2; }
+        else if (this.varPuntajePalomas === 25) { this.velocidadDelJuego = 1.4; }
+        else if (this.varPuntajePalomas === 50) { this.velocidadDelJuego = 1.7; }
 
         this.varEstadoActualBarraDeProgreso = Math.min(100,
             this.varEstadoActualBarraDeProgreso + this.varDeltaBarraDeEstado);
@@ -420,21 +437,5 @@ class GameScene extends Phaser.Scene {
         const pct = this.varEstadoActualBarraDeProgreso / 100;
         this.barraRelleno.width     = Math.max(0, 180 * pct);
         this.barraRelleno.fillColor = this.varEstadoActualBarraDeProgreso >= 50 ? 0x1b6c0e : 0xdd1900;
-    }
-
-    cambiarFondo(color) {
-        this.tweens.addCounter({
-            from: 0, to: 1, duration: 1000,
-            onUpdate: (tw) => {
-                const t   = tw.getValue();
-                const cur = Phaser.Display.Color.ValueToColor(this.fondoBase.fillColor);
-                const dst = Phaser.Display.Color.ValueToColor(color);
-                this.fondoBase.setFillStyle(Phaser.Display.Color.GetColor(
-                    Phaser.Math.Linear(cur.red,   dst.red,   t),
-                    Phaser.Math.Linear(cur.green, dst.green, t),
-                    Phaser.Math.Linear(cur.blue,  dst.blue,  t)
-                ));
-            }
-        });
     }
 }
