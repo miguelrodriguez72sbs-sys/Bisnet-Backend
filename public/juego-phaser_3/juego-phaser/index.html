@@ -3,22 +3,185 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Juego Didáctico</title>
+    <title>Mini Games</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
+      
       body {
-        height: 100vh;
-        background: #584040;
+        min-height: 100vh;
+        background: #fcfbf7; /* Fondo claro de la imagen */
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
+        font-family: 'Inter', sans-serif;
+        padding: 20px 0;
       }
-      canvas { display: block; }
+
+      canvas { 
+        display: block; 
+        margin: auto;
+      }
+
+      /* -------- CONTENEDOR DE LA INTERFAZ -------- */
+      #menuScreen {
+        width: 100%;
+        max-width: 450px;
+        padding: 15px;
+        text-align: center;
+        z-index: 10;
+      }
+
+      .main-title {
+        font-size: 34px;
+        font-weight: 900;
+        color: #38761d;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .main-subtitle {
+        font-size: 15px;
+        color: #555555;
+        font-weight: 500;
+        margin-bottom: 30px;
+      }
+
+      /* -------- TARJETAS DE JUEGOS -------- */
+      .game-container {
+        text-align: left;
+        margin-bottom: 35px;
+      }
+
+      .mini-label {
+        color: #38761d;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+      }
+
+      .title {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        color: #000000;
+        text-transform: uppercase;
+      }
+
+      .card {
+        border-radius: 18px;
+        overflow: hidden;
+        background: transparent;
+        margin-bottom: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      }
+
+      .card img {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      /* Botón verde idéntico al de la captura */
+      .play-button {
+        display: block;
+        width: 55%;
+        max-width: 180px;
+        height: 44px;
+        margin: 0 auto;
+        border: none;
+        border-radius: 12px;
+        background: #4c7d22;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+
+      .play-button:hover {
+        transform: scale(1.04);
+        background: #3e661c;
+      }
+
+      /* Estilo para el botón desactivado */
+      .play-button.disabled {
+        background: #888888;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .play-button.disabled:hover {
+        transform: none;
+        background: #888888;
+      }
     </style>
   </head>
   <body>
+
+    <div id="menuScreen">
+      <h1 class="main-title">Mini Games</h1>
+      <p class="main-subtitle">Choose a minigame to get started</p>
+
+      <div class="game-container">
+        <div class="mini-label">Minigame 1</div>
+        <div class="title">Owl Gebra</div>
+        <div class="card">
+          <img src="img/owlgebra.png" alt="OWL GEBRA">
+        </div>
+        <button class="play-button disabled" onclick="alert('Este minijuego no está disponible aún.')">PLAY</button>
+      </div>
+
+      <div class="game-container">
+        <div class="mini-label">Minigame 2</div>
+        <div class="title">Data Race</div>
+        <div class="card">
+          <img src="img/datarace.png" alt="DATA RACE" onerror="this.src='img/owlgebra.png';">
+        </div>
+        <button class="play-button" id="btnPlayDataRace">PLAY</button>
+      </div>
+    </div>
+
     <script src="js/GameScene.js"></script>
     <script src="js/main.js"></script>
+
+    <script>
+      // Función para iniciar el juego inmediatamente
+      function startDataRaceGame() {
+        // 1. Ocultamos la interfaz de tarjetas por completo
+        document.getElementById("menuScreen").style.display = "none";
+        
+        // 2. Transición de fondo al color verde oliva del lienzo original
+        document.body.style.background = "#3e661c";
+        
+        // 3. Mostramos el canvas de Phaser y refrescamos la escala para evitar fallos visuales
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+          canvas.style.display = 'block';
+        }
+        if (window.game) {
+          window.game.scale.refresh();
+        }
+      }
+
+      // Oculta el lienzo de Phaser automáticamente en lo que decides presionar PLAY
+      const checkCanvasInterval = setInterval(() => {
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+          canvas.style.display = 'none';
+          clearInterval(checkCanvasInterval);
+        }
+      }, 50);
+
+      // Asignamos la acción directa al hacer click en el botón PLAY de Data Race
+      document.getElementById('btnPlayDataRace').addEventListener('click', startDataRaceGame);
+    </script>
   </body>
 </html>
