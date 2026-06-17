@@ -101,35 +101,41 @@ class GameScene extends Phaser.Scene {
 
         // ── Robot ──────────────────────────────────────────────────
         this.robot = this.add.sprite(84, 280, 'lechuza')
-            .setOrigin(0.5, 1).setDepth(3).setScale(0.5);
+            .setOrigin(0.5, 1).setDepth(3).setScale(0.4);
         this.robot.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         this.robot.play('correr');
 
-        // ── UI ─────────────────────────────────────────────────────
-        this.add.rectangle(0, 0, 205, 74, 0x000000, 0.4)
-            .setOrigin(0, 0).setDepth(8);
-
+        // ── UI — Stats sin fondo ───────────────────────────────────
         const f = { fontFamily: 'Verdana', fontStyle: 'bold' };
 
-        this.add.rectangle(6, 5, 180, 14, 0x78a8d4)
-            .setOrigin(0, 0).setDepth(9);
-        this.barraRelleno = this.add.rectangle(6, 5, 90, 14, 0x1b6c0e)
-            .setOrigin(0, 0).setDepth(10);
-        this.add.text(190, 4, '♥', { ...f, fontSize: '12px', color: '#ff9999' })
+        // Corazones de vida
+        this.corazones = [];
+        for (let i = 0; i < 5; i++) {
+            const c = this.add.text(8 + i * 26, 5, '❤️', { fontSize: '16px' })
+                .setDepth(10);
+            this.corazones.push(c);
+        }
+
+        // Aciertos con estrella
+        this.add.text(8, 34, '⭐', { fontSize: '15px' }).setDepth(10);
+        this.txtAciertos = this.add.text(30, 34,
+            'Aciertos: 0', { ...f, fontSize: '13px', color: '#ffe066',
+              stroke: '#000000', strokeThickness: 3 })
             .setDepth(10);
 
-        this.txtAciertos = this.add.text(6, 24,
-            'Aciertos: 0', { ...f, fontSize: '14px', color: '#aaddff' })
-            .setDepth(9);
-        this.txtErrores = this.add.text(6, 46,
-            'Desaciertos: 0', { ...f, fontSize: '14px', color: '#ffaaaa' })
-            .setDepth(9);
+        // Errores con X
+        this.add.text(8, 56, '❌', { fontSize: '13px' }).setDepth(10);
+        this.txtErrores = this.add.text(30, 57,
+            'Errores: 0', { ...f, fontSize: '13px', color: '#ff6b6b',
+              stroke: '#000000', strokeThickness: 3 })
+            .setDepth(10);
 
-        // ── Palabra ────────────────────────────────────────────────
-        this.panelPalabra = this.add.rectangle(460, 0, 200, 36, 0x000000, 0.4)
-            .setOrigin(0.5, 0).setDepth(8);
-        this.txtPalabra = this.add.text(460, 6, '',
-            { ...f, fontSize: '22px', color: '#ffffff' })
+        // ── Palabra en inglés ──────────────────────────────────────
+        this.txtLibro = this.add.text(370, 8, '📖', { fontSize: '18px' })
+            .setDepth(9);
+        this.txtPalabra = this.add.text(460, 8, '',
+            { ...f, fontSize: '20px', color: '#ffffff',
+              stroke: '#000000', strokeThickness: 4 })
             .setOrigin(0.5, 0).setDepth(9);
 
         // ── Botones pausa y reinicio ───────────────────────────────
@@ -140,7 +146,7 @@ class GameScene extends Phaser.Scene {
         this.btnReinicio.on('pointerover', () => this.btnReinicio.setAlpha(0.7));
         this.btnReinicio.on('pointerout',  () => this.btnReinicio.setAlpha(1));
 
-        this.btnPausa = this.add.text(880, 8, '⏸',
+        this.btnPausa = this.add.text(882, 8, '⏸',
             { fontSize: '22px', backgroundColor: '#00000077', padding: { x: 6, y: 4 } })
             .setDepth(15).setInteractive({ useHandCursor: true });
         this.btnPausa.on('pointerdown', () => this.TogglePausa());
@@ -159,6 +165,13 @@ class GameScene extends Phaser.Scene {
               backgroundColor: '#00000099', padding: { x: 20, y: 10 } })
             .setOrigin(0.5).setDepth(20).setVisible(false);
 
+        // ── Botón saltar en pantalla (móvil) ──────────────────────
+        this.btnSaltar = this.add.text(460, 272, '▲  SALTAR',
+            { ...f, fontSize: '14px', color: '#ffffff',
+              backgroundColor: '#00000066', padding: { x: 14, y: 6 } })
+            .setOrigin(0.5, 1).setDepth(15).setInteractive({ useHandCursor: true });
+        this.btnSaltar.on('pointerdown', () => this.Saltar());
+
         // ── Sonidos ────────────────────────────────────────────────
         this.sndFondo  = this.sound.add('fondo',       { loop: true, volume: 0.5 });
         this.sndBrinca = this.sound.add('brinca',      { volume: 0.8 });
@@ -167,11 +180,16 @@ class GameScene extends Phaser.Scene {
         this.sndFin    = this.sound.add('finDelJuego', { volume: 1.0 });
         this.sndFondo.play();
 
-        // ── Input ──────────────────────────────────────────────────
+        // ── Input teclado ──────────────────────────────────────────
         this.input.keyboard.on('keydown-UP',    () => this.Saltar());
         this.input.keyboard.on('keydown-SPACE', () => this.Saltar());
         this.input.keyboard.on('keydown-P',     () => this.TogglePausa());
         this.input.keyboard.on('keydown-R',     () => this.Reiniciar());
+
+        // ── Input táctil — toque en pantalla para saltar ───────────
+        this.input.on('pointerdown', (pointer) => {
+            if (pointer.y > 40) this.Saltar();
+        });
 
         this.ConstruirPalabra();
         this.actualizarBarra();
@@ -205,7 +223,7 @@ class GameScene extends Phaser.Scene {
         this.varFormulaEnTexto = p.ingles;
         this.varResultado      = p.espanol;
         this.txtPalabra.setText(p.ingles);
-        this.panelPalabra.width = this.txtPalabra.width + 30;
+        this.txtLibro.x = 460 - (this.txtPalabra.width / 2) - 22;
     }
 
     Saltar() {
@@ -257,7 +275,6 @@ class GameScene extends Phaser.Scene {
             Math.random() * (this.tiempoNubeMax - this.tiempoNubeMin) / this.velocidadDelJuego;
     }
 
-    // ── Obstáculos ───────────────────────────────────────────────
     CrearObstaculo() {
         const esBonsai = Math.random() > 0.5;
         const key      = esBonsai ? 'bonsai' : 'pino';
@@ -277,7 +294,6 @@ class GameScene extends Phaser.Scene {
             Math.random() * (this.tiempoObstaculoMax - this.tiempoObstaculoMin) / this.velocidadDelJuego;
     }
 
-    // ── Palomas ──────────────────────────────────────────────────
     CrearPaloma() {
         let texto;
         if (Math.random() > 0.5) {
@@ -326,18 +342,13 @@ class GameScene extends Phaser.Scene {
 
             if (o.esPaloma) {
                 o.posX -= desp;
-
                 const tiempo = this.time.now * 0.005;
                 const desvY  = Math.sin(tiempo + i) * 15;
-
                 o.img.x = o.posX;
                 o.img.y = o.pieY + desvY;
-
                 o.txt.x = o.posX;
                 o.txt.y = (o.pieY + desvY) - 50;
-
                 o.actualY = o.pieY + desvY;
-
                 if (o.posX < -100) {
                     o.img.destroy(); o.txt.destroy();
                     this.conjuntoDeObstaculos.splice(i, 1);
@@ -354,10 +365,10 @@ class GameScene extends Phaser.Scene {
     }
 
     DetectarColision() {
-        const rPie    = this.robot.y;
-        const rTop    = rPie  - 84;
-        const rLeft   = 42;
-        const rRight  = 126;
+        const rPie   = this.robot.y;
+        const rTop   = rPie  - 84;
+        const rLeft  = 42;
+        const rRight = 126;
 
         for (let i = 0; i < this.conjuntoDeObstaculos.length; i++) {
             const o = this.conjuntoDeObstaculos[i];
@@ -386,7 +397,7 @@ class GameScene extends Phaser.Scene {
                         this.GanarPuntosPalomas(i);
                     } else {
                         this.varPuntajeDeErrores++;
-                        this.txtErrores.setText('Desaciertos: ' + this.varPuntajeDeErrores);
+                        this.txtErrores.setText('Errores: ' + this.varPuntajeDeErrores);
                         this.sndMala.stop(); this.sndMala.play();
                         this.varEstadoActualBarraDeProgreso -= this.varDeltaBarraDeEstado;
                         if (this.varEstadoActualBarraDeProgreso <= 0) {
@@ -428,14 +439,16 @@ class GameScene extends Phaser.Scene {
         this.detenido = true;
         this.robot.play('estrellado');
         this.txtFin.setVisible(true);
+        this.btnSaltar.setVisible(false);
         this.sndFondo.stop();
         this.sndFin.stop();
         this.sndFin.play();
     }
 
     actualizarBarra() {
-        const pct = this.varEstadoActualBarraDeProgreso / 100;
-        this.barraRelleno.width     = Math.max(0, 180 * pct);
-        this.barraRelleno.fillColor = this.varEstadoActualBarraDeProgreso >= 50 ? 0x1b6c0e : 0xdd1900;
+        const vidas = Math.ceil(this.varEstadoActualBarraDeProgreso / 20);
+        for (let i = 0; i < 5; i++) {
+            this.corazones[i].setText(i < vidas ? '❤️' : '🖤');
+        }
     }
 }

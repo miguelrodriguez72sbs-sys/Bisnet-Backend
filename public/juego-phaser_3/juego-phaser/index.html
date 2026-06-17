@@ -2,37 +2,39 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Mini Games</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      
-      body {
-        min-height: 100vh;
-        background: #fcfbf7; /* Fondo claro de la imagen */
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #fcfbf7;
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* ── MENÚ ── */
+      #menuScreen {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         align-items: center;
-        font-family: 'Inter', sans-serif;
         padding: 20px 0;
       }
 
-      canvas { 
-        display: block; 
-        margin: auto;
-      }
-
-      /* -------- CONTENEDOR DE LA INTERFAZ -------- */
-      #menuScreen {
+      #menuInner {
         width: 100%;
         max-width: 450px;
         padding: 15px;
         text-align: center;
-        z-index: 10;
       }
 
       .main-title {
@@ -51,7 +53,6 @@
         margin-bottom: 30px;
       }
 
-      /* -------- TARJETAS DE JUEGOS -------- */
       .game-container {
         text-align: left;
         margin-bottom: 35px;
@@ -88,7 +89,6 @@
         object-fit: cover;
       }
 
-      /* Botón verde idéntico al de la captura */
       .play-button {
         display: block;
         width: 55%;
@@ -112,7 +112,6 @@
         background: #3e661c;
       }
 
-      /* Estilo para el botón desactivado */
       .play-button.disabled {
         background: #888888;
         cursor: not-allowed;
@@ -122,66 +121,85 @@
         transform: none;
         background: #888888;
       }
+
+      /* ── JUEGO ── */
+      #gameScreen {
+        display: none;
+        width: 100%;
+        height: 100%;
+        background: #584040;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #gameScreen canvas {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+      }
     </style>
   </head>
   <body>
 
+    <!-- MENÚ -->
     <div id="menuScreen">
-      <h1 class="main-title">Mini Games</h1>
-      <p class="main-subtitle">Choose a minigame to get started</p>
+      <div id="menuInner">
+        <h1 class="main-title">Mini Games</h1>
+        <p class="main-subtitle">Choose a minigame to get started</p>
 
-      <div class="game-container">
-        <div class="mini-label">Minigame 1</div>
-        <div class="title">Owl Gebra</div>
-        <div class="card">
-          <img src="img/owlgebra.png" alt="OWL GEBRA">
+        <div class="game-container">
+          <div class="mini-label">Minigame 1</div>
+          <div class="title">Owl Gebra</div>
+          <div class="card">
+            <img src="img/owlgebra.png" alt="OWL GEBRA">
+          </div>
+          <button class="play-button disabled" onclick="alert('Este minijuego no está disponible aún.')">PLAY</button>
         </div>
-        <button class="play-button disabled" onclick="alert('Este minijuego no está disponible aún.')">PLAY</button>
-      </div>
 
-      <div class="game-container">
-        <div class="mini-label">Minigame 2</div>
-        <div class="title">Data Race</div>
-        <div class="card">
-          <img src="img/datarace.png" alt="DATA RACE" onerror="this.src='img/owlgebra.png';">
+        <div class="game-container">
+          <div class="mini-label">Minigame 2</div>
+          <div class="title">Data Race</div>
+          <div class="card">
+            <img src="img/datarace.png" alt="DATA RACE" onerror="this.src='img/owlgebra.png';">
+          </div>
+          <button class="play-button" id="btnPlayDataRace">PLAY</button>
         </div>
-        <button class="play-button" id="btnPlayDataRace">PLAY</button>
       </div>
     </div>
+
+    <!-- JUEGO -->
+    <div id="gameScreen"></div>
 
     <script src="js/GameScene.js"></script>
     <script src="js/main.js"></script>
 
     <script>
-      // Función para iniciar el juego inmediatamente
-      function startDataRaceGame() {
-        // 1. Ocultamos la interfaz de tarjetas por completo
-        document.getElementById("menuScreen").style.display = "none";
-        
-        // 2. Transición de fondo al color verde oliva del lienzo original
-        document.body.style.background = "#3e661c";
-        
-        // 3. Mostramos el canvas de Phaser y refrescamos la escala para evitar fallos visuales
-        const canvas = document.querySelector('canvas');
-        if (canvas) {
-          canvas.style.display = 'block';
-        }
-        if (window.game) {
-          window.game.scale.refresh();
-        }
-      }
-
-      // Oculta el lienzo de Phaser automáticamente en lo que decides presionar PLAY
+      // Ocultar canvas de Phaser hasta que el usuario presione PLAY
       const checkCanvasInterval = setInterval(() => {
         const canvas = document.querySelector('canvas');
         if (canvas) {
+          // Mover canvas al gameScreen
+          document.getElementById('gameScreen').appendChild(canvas);
           canvas.style.display = 'none';
           clearInterval(checkCanvasInterval);
         }
       }, 50);
 
-      // Asignamos la acción directa al hacer click en el botón PLAY de Data Race
-      document.getElementById('btnPlayDataRace').addEventListener('click', startDataRaceGame);
+      document.getElementById('btnPlayDataRace').addEventListener('click', () => {
+        // Ocultar menú
+        document.getElementById('menuScreen').style.display = 'none';
+
+        // Mostrar pantalla de juego
+        const gameScreen = document.getElementById('gameScreen');
+        gameScreen.style.display = 'flex';
+
+        // Mostrar canvas
+        const canvas = document.querySelector('canvas');
+        if (canvas) canvas.style.display = 'block';
+
+        // Refrescar escala de Phaser
+        if (window.game) window.game.scale.refresh();
+      });
     </script>
   </body>
 </html>

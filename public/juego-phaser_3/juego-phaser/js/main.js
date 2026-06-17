@@ -1,4 +1,4 @@
-// main.js — Configuración de Phaser 3
+// main.js — Configuración de Phaser 3 (responsivo)
 
 const config = {
     type:            Phaser.AUTO,
@@ -6,11 +6,17 @@ const config = {
     height:          280,
     backgroundColor: '#ffe2d1',
     parent:          document.body,
+    scale: {
+        mode:      Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width:     920,
+        height:    280,
+    },
     physics: {
         default: 'arcade',
-        arcade:  { gravity: { y: 0 }, debug: false }  // gravedad manual igual que el original
+        arcade:  { gravity: { y: 0 }, debug: false }
     },
     scene: [GameScene]
 };
 
-const game = new Phaser.Game(config);
+window.game = new Phaser.Game(config);
