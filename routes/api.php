@@ -29,4 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['auth:sanctum', 'correo.institucional'])->group(function () {
     Route::get('/estadias',      [EstadiaController::class, 'index']);
     Route::get('/estadias/{id}', [EstadiaController::class, 'show']);
+    
+    //Ruta para dar/quitar like a una publicación
+    Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']); 
 });
