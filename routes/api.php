@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\EstadiaController;
+use App\Http\Controllers\CommunityController;
 
 // Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,4 +33,16 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //Ruta para dar/quitar like a una publicación
     Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']); 
-});
+    
+    });
+    Route::middleware('auth:sanctum')->group(function () {
+    // Comunidades
+    Route::get('/communities', [CommunityController::class, 'index']);
+    Route::post('/communities', [CommunityController::class, 'store']);
+    Route::post('/communities/{id}/join', [CommunityController::class, 'join']);
+    Route::delete('/communities/{id}/leave', [CommunityController::class, 'leave']);
+    Route::get('/communities/{id}/members', [CommunityController::class, 'members']);
+    Route::get('/communities/{id}/messages', [CommunityController::class, 'messages']);
+    Route::post('/communities/{id}/messages', [CommunityController::class, 'sendMessage']);
+    Route::post('/communities/{communityId}/approve/{userId}', [CommunityController::class, 'approve']);
+    });
