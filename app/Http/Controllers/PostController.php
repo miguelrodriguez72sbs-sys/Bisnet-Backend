@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificationCreated;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Like;
 use Illuminate\Http\Request;
@@ -111,6 +113,21 @@ class PostController extends Controller
             // No tenía like → lo agrega
             Like::create(['user_id' => $userId, 'post_id' => $id]);
             $liked = true;
+
+                    // Solo notifica si no te das like a ti mismo
+            if ($post->user_id !== $userId) {
+                $notification = Notification::create([
+                    'user_id'      => $post->user_id,
+                    'from_user_id' => $userId,
+                    'type'         => 'like',
+                    'data'         => [
+                        'post_id'    => $post->id,
+                        'post_title' => $post->title,
+                    ],
+                ]);
+
+                broadcast(new NotificationCreated($notification))->toOthers();
+            }
         }
 
         $totalLikes = $post->likes()->count();

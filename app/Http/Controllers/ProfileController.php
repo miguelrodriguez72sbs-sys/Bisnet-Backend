@@ -31,4 +31,28 @@ class ProfileController extends Controller
             'user'    => $user,
         ]);
     }
+
+    // SUBIR / CAMBIAR FOTO DE PERFIL
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|image|max:5120', // 5MB máx
+        ]);
+
+        $user = $request->user();
+
+        // Borra la foto anterior si existe
+        if ($user->profile_photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        $path = $request->file('photo')->store('profile_photos', 'public');
+
+        $user->update(['profile_photo' => $path]);
+
+        return response()->json([
+            'message' => 'Foto de perfil actualizada correctamente.',
+            'user'    => $user,
+        ]);
+    }
 }
