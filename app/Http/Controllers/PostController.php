@@ -10,10 +10,10 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    // VER TODAS LAS PUBLICACIONES
+    // VER TODAS LAS PUBLICACIONES (público: también funciona para invitados)
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
+        $userId = $request->user()?->id;
 
         $posts = Post::with('user')
             ->withCount('likes') //cuenta total de likes
@@ -22,7 +22,7 @@ class PostController extends Controller
 
         //marca si el usuario actual ya dio like
         $posts->each(function ($post) use ($userId) {
-            $post->liked_by_me = $post->isLikedBy($userId);
+            $post->liked_by_me = $userId !== null && $post->isLikedBy($userId);
         });
 
         return response()->json($posts);

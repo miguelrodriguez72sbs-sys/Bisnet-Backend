@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Broadcast;
 // Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
+Route::get('/posts',     [PostController::class, 'index']); // invitados pueden ver publicaciones
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -41,7 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/{userId}', [MessageController::class, 'store']);
 
     //publicaciones - posts
-    Route::get('/posts',        [PostController::class, 'index']);
     Route::get('/posts/my',     [PostController::class, 'myPosts']);
     Route::post('/posts',       [PostController::class, 'store']);
     Route::delete('/posts/{id}',[PostController::class, 'destroy']);
