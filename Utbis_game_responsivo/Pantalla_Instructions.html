@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  Instructions  </title>
+
+    <link  href = "Style_Pantalla_Instructions.css"   rel = "stylesheet"  type = "text/css" />
+
+</head>
+
+
+<body>
+    
+    <img src="imagenes/instructions.png" class="img-Instructions" alt="Instructions">
+     
+     <a href="Pantalla_Juego.html" class="btn-Play2">
+      <img src="imagenes/Boton_Play.png" alt="Play2">
+    </a>
+
+    <audio id="Sonido_Instructions" autoplay loop>
+      <source src="Sonidos/Sonido_Instrucciones.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const musicInst = document.getElementById("Sonido_Instructions");
+        musicInst.volume = 1.0;
+
+        // intento de autoplay
+        musicInst.play().catch(() => {
+        document.addEventListener("click", () => {
+            musicInst.play();
+        }, { once: true });
+        });
+</script>
+
+</body>
+</html>

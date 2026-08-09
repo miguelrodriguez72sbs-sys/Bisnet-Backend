@@ -1,0 +1,364 @@
+
+/* Comentario en css */
+
+/*  Escribimos los valores del entorno del juego que debn estar por defaul
+                                        */
+* {
+    padding:    0; /* Definimos los margenes con respecto al cuadro donde aparecerá el juego */
+    margin:     0; /* Definimos los margenes con respecto al navegador */
+}
+
+body
+{
+    min-height:    100vh;   /* Define el margen del cuadro donde aparecerá el juego  */
+    background:    #584040; /* Definimos el fondo de nuestro juego   */
+    display:       flex;    /* Define el cuadro donde aparecerá el juego   */
+    align-items:   center;  /* Es alineado en el centro   */
+    justify-content: center;
+    overflow:      hidden;  /* Evita el scroll de la pagina mientras se juega */
+}
+/*------------------------------------------*/
+
+/* Contenedor que escala el escenario de tamaño fijo (920x280) para que
+   quepa en cualquier ancho de pantalla, sin tocar la lógica del juego,
+   que sigue midiendo 920x280 internamente (ver procesamiento.js) */
+.stageWrapper
+{
+    position: relative;
+    touch-action: none; /* evita el scroll/zoom al tocar para saltar */
+}
+
+.entornoDelJuego
+{
+    width:         920px;  /*  Definimos el ancho  del cuadro donde aparecerá el juego  */
+    height:        280px;  /*  Definimos la altura del cuadro donde aparecerá el juego  */
+
+    position:      absolute;
+    top:           0;
+    left:          0;
+    transform-origin: top left;
+
+
+    background:   linear-gradient(#b7d6c7, transparent) #ffe2d1;    /*  Colocamos un degradado al fondo  */
+    transition:   background-color 1s linear;   /*  hace uns transicion de colores lineal */
+    overflow:     hidden;  /* Ocultamos cualquier objeto que se salga del entorno del juego */
+}
+
+.mediodia
+{
+    /*  Definimos el color de fondo del medio dia      */
+    background-color: #ffdf9e;
+}
+
+.tarde
+{
+    /*  Definimos el color de fondo de la tarde     */
+    background-color: #c86158;
+}
+
+.noche
+{
+    /*  Definimos el color de fondo de la noche    */
+    background-color: #aca8c7;
+}
+
+
+/* Definimos las dimensiones de nuestro personaje  */
+.robotito
+{
+   /*  Dimensiones de acuerdo a la imagen de nuestro personaje  */
+    width:                   84px;              /* Ancho  del personaje   */
+    height:                  84px;              /* Altura del personaje   */
+
+    position:                absolute;  /* La posicion del objeto será tomando como referencia al cuadro del entorno del juego */
+    bottom:                  22px;      /* Lo colocaremos a 22 pixeles a la izquierda*/
+    left:                    42px;      /* Lo colocaremos a 42 pixeles desde la parte baja del escenario*/
+    z-index:                 2;
+
+    /** hacemos que el personaje (la imagen ) se muestre en el entorno del juego */
+    background:              url(img/piolin.png) repeat-x 0px 0px;
+    background-size:         336px 84px;
+    background-position-x:   0px;
+
+}
+
+/*  Mostramos las 2 imagenes de manera alterna de forma infinita,
+    para que simule que va corriendo */
+.robotito-corriendo
+{
+    /* Mostramos las 2 imagenes sin puntos intermedios */
+    animation: animarRobot 0.25s steps(2) infinite;
+}
+
+/*  Previsualizamos la animación  del personaje en las coordenadas iniciales         */
+.robotito-estrellado
+{
+    background-position-x: -252px;
+}
+
+/* Definimos el piso con el doble del ancho del entorno del juego
+  para que simule que es diferente piso y la posición donde aparecerá  */
+.suelo
+{
+    width:                200%;  /* Ancho de la imagen   */
+    height:               42px;  /* Altura de la imagen  */
+
+    position:             absolute; /* La posicion de la imagen del suelo será tomando como referencia al cuadro del entorno del juego */
+    bottom:               0;  /* Lo colocaremos a 0 pixeles a la izquierda*/
+    left:                 0;  /* Lo colocaremos a 0 pixeles desde la parte baja del escenario*/
+
+    background:           url(img/suelo.png) repeat-x 0px 0px;  /* mostramos la imagen del suelo en el fondo de la página */
+    background-size:      50% 42px;  /*mostramos la mitad de la imagen del suelo y luego recorremos la otra mitad */
+
+}
+
+.pino
+{
+    width:                 46px;
+    height:                96px;
+
+    position:              absolute;
+    bottom:                16px;
+    left:                  600px;
+    z-index:               1;
+
+    background:            url(img/pino.png) no-repeat;
+}
+.bonsai
+{
+    width:                 98px;
+    height:                66px;
+
+    background:            url(img/bonsai.png) no-repeat;
+}
+
+.nube
+{
+    width:                 92px;
+    height:                26px;
+
+    position:              absolute;
+    z-index:               0;
+
+    background:            url(img/nube.png) no-repeat;
+    background-size:       92px 26px;
+}
+
+.paloma{
+    width:80px;
+    height:80px;
+
+    position:absolute;
+    z-index:1;
+
+    background:url(img/paloma.gif) no-repeat center center;
+    background-size:60px 60px;
+
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+
+    color:#000080;
+
+    text-shadow:
+        1px 1px 0 white,
+       -1px 1px 0 white,
+        1px -1px 0 white,
+       -1px -1px 0 white;
+}
+
+
+.tableroPuntaje{
+
+    position:absolute;
+
+    top:0px;
+    left:8px;
+
+    width:240px;
+    height:110px;
+
+    background:url(img/Tablero.png) no-repeat center;
+    background-size:100% 100%;
+
+    z-index:20;
+}
+
+.puntajePalomas{
+
+    position:absolute;
+
+    top:28px;
+    left:28px;
+
+    color:#2d4dff;
+
+    font-family:Verdana;
+    font-size:20px;
+    font-weight:bold;
+
+}
+
+.puntajeDeErrores{
+
+    position:absolute;
+
+    top:62px;
+    left:28px;
+
+    color:#c30000;
+
+    font-family:Verdana;
+    font-size:20px;
+    font-weight:bold;
+
+}
+
+
+
+.finDelJuego
+{
+    display:               none;
+
+    position:              absolute;
+    width:                 100%;
+
+    text-align:            center;
+    color:                 #7e928b;
+    font-size:             30px;
+    font-family:           Verdana;
+    font-weight:           700;
+}
+
+/*-------------------------------------------------------*/
+
+.controlesJuego{
+
+    position:absolute;
+
+    top:12px;
+    right:15px;
+
+    display:flex;
+    gap:10px;
+
+    z-index:1000;
+
+}
+.controlesJuego button{
+
+    width:40px;
+    height:40px;
+
+    border:none;
+    border-radius:8px;
+
+    background:#f5e6c8;
+    border:3px solid #6a4c2d;
+
+    cursor:pointer;
+
+    font-size:20px;
+    font-weight:bold;
+
+    transition:.2s;
+
+}
+
+.controlesJuego button:hover{
+
+    transform:scale(1.1);
+
+    background:#fff3d6;
+
+}
+
+
+
+/* Nuevo contenedor para centrar ambos elementos arriba */
+.contenedor-header {
+    position: absolute;
+    top: 15px;          /* Distancia desde el borde superior del juego */
+    left: 50%;          /* Lo mueve al centro matemático */
+    transform: translateX(-50%); /* Lo centra perfectamente respecto a su propio ancho */
+    display: flex;      /* Alinea la palabra y la barra en fila */
+    align-items: center; /* Los centra verticalmente entre sí */
+    gap: 15px;          /* Espacio de separación entre la palabra y la barra */
+    z-index: 100;       /* Asegura que se vea por encima de otros elementos */
+}
+
+/* Ajustes para la palabra */
+.palabraIngles {
+    /* Eliminamos position: absolute y coordenadas viejas */
+    color: #1619b1;
+    font-family: Verdana;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 white; /* Un pequeño borde blanco opcional para que resalte */
+}
+
+/* Ajustes para la barra */
+.barraDeEstado {
+    /* Eliminamos márgenes raros si los hubiera */
+    width: 250px;       /* Puedes ajustar el ancho a tu gusto */
+    height: 20px;
+    border: 3px solid #333;
+    border-radius: 20px;
+}
+
+.barraDeEstado::-webkit-meter-bar
+{
+    background: 	#78a8d4;
+    border-radius:	13px;
+}
+
+.barraDeEstado::-webkit-meter-optimum-value
+{
+    background: 	#1b6c0e;
+    border-radius:	13px;
+}
+
+.barraDeEstado::-webkit-meter-suboptimum-value
+{
+    background:     #dd1900;
+    border-radius:  13px;
+}
+
+.barraDeEstado::-webkit-meter-bar{
+    background:#ddd;
+
+    border-radius:20px;
+
+    box-shadow:
+        inset 0 0 10px rgba(0,0,0,.4);
+}
+
+.barraDeEstado::-webkit-meter-optimum-value{
+    background:linear-gradient(
+        to right,
+        #00ff00,
+        #7CFC00
+    );
+
+    border-radius:20px;
+}
+
+
+/* -----------------------------------*/
+
+/*  Hacemos el efecto de que el personaje corra   */
+@keyframes animarRobot
+{
+   /* Definimos los pasos de la animación  */
+    from{
+        background-position-x: -84px;
+    }
+    to{
+        background-position-x: -252px;
+    }
+}
+

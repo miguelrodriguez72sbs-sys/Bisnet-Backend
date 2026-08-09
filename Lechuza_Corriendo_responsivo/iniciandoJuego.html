@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+      <head>
+          <meta      charset="UTF-8">
+          <meta      http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta      name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+          <title>    Juego didactico </title>
+          <link      href = "ambiente.css" rel = "stylesheet" type = "text/css" />
+          <script    src  = "procesamiento.js">   </script>
+
+      </head>
+      <body>
+
+        <!-- Contenedor que centra y escala el escenario del juego para que quepa en cualquier pantalla -->
+        <div class="stageWrapper">
+          <!-- Creamos el entorno del juego -->
+          <div class="entornoDelJuego">
+
+                        <!-- Dentro del entorno del juego creamos el suelo, el personaje y el puntaje del personaje -->
+
+                        <div class = "suelo"></div>
+
+                        <!-- Mostramos la animacion del personaje corriendo -->
+                        <div class = "robotito robotito-corriendo"></div>
+
+                        <div class="contenedor-header">
+                            <div class="palabraIngles">School</div> <meter class="barraDeEstado" min="0" max="100" low="50" high="100" value="30"></meter>
+                        </div>
+
+                    <div class="tableroPuntaje">
+
+                        <div class="puntajePalomas">
+                            Aciertos: <span id="aciertos">0</span>
+                        </div>
+
+                        <div class="puntajeDeErrores">
+                            Desaciertos: <span id="errores">0</span>
+                        </div>
+
+                    </div>
+
+
+                        <div class="controlesJuego">
+
+                            <button id="btnPausa" title="Pausar">
+                                ⏸
+                            </button>
+
+                            <button id="btnReiniciar" title="Reiniciar">
+                                ↻
+                            </button>
+
+                        </div>
+
+                        
+
+                        <audio src = "sonido/palomaBuena.mp3"         class = "audio-palomaBuena">    </audio>
+                        <audio src = "sonido/palomaMala.mp3"          class = "audio-palomaMala">     </audio>
+                        <audio src = "sonido/brinca.mp3"              class = "audio-brinca">         </audio>
+                        <audio src = "sonido/finDelJuego.mp3"         class = "audio-finDelJuego">    </audio>
+
+                        <audio src = "sonido/fondo.mp3" autoplay loop  class = "audio-fondo">  </audio>
+
+          </div>
+        </div>
+
+        <div class="finDelJuego">Finaliz&oacute; el juego</div>
+
+      </body>
+</html>

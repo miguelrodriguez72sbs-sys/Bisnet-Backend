@@ -1,0 +1,51 @@
+body {
+  background-image: url("imagenes/Fondo_Marino_Instrucciones.png");
+  background-size: cover; 
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; 
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+/*-------------------------------------------------*/
+.img-Instructions {
+  width: min(85vw, 800px);
+  height: auto;
+  display: block;
+  margin: clamp(30px, 8vh, 80px) auto;
+  background-attachment: fixed; 
+}
+
+/*-------------------------------------------------*/
+
+.btn-Play2 {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(-140px, -18vw, -60px);
+  position: relative;
+}
+
+.btn-Play2 img {
+  width: clamp(170px, 40vw, 300px);
+  max-width: 80vw;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.btn-Play2 img:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 15px rgb(0, 247, 255));
+}
+
+@keyframes flotar {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.btn-Play2 img{
+  animation: flotar 2.5s ease-in-out infinite;
+}
+
+

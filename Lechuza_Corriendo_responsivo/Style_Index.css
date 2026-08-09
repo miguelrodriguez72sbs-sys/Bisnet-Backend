@@ -1,0 +1,70 @@
+body {
+  background-image: url("img/Fondo_Pantalla_Inicio.png");
+  background-size: cover; /* Cubre toda la pantalla*/
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /*efecto elegante */
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+header img {
+  width: clamp(220px, 60vw, 500px);
+  max-width: 90vw;
+  height: auto;
+}
+
+/* ---------------------------------------------------------*/
+.btn-jugar {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(-20px, -3vw, -10px);
+  position: relative;
+}
+
+.btn-jugar img {
+  width: clamp(160px, 38vw, 250px);
+  max-width: 78vw;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* 🫧 hover burbujeante */
+.btn-jugar img:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 15px rgb(199, 163, 93));
+}
+
+/*--------------------------------------------------------*/
+
+.btn-Instructions {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(-10px, -1.5vw, -5px);
+  position: relative;
+}
+
+.btn-Instructions img {
+  width: clamp(160px, 38vw, 250px);
+  max-width: 78vw;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* 🫧 hover burbujeante */
+.btn-Instructions img:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 15px rgb(199, 163, 93));
+}
+
+@keyframes flotar {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+body img {
+  animation: flotar 2.5s ease-in-out infinite;
+}
+

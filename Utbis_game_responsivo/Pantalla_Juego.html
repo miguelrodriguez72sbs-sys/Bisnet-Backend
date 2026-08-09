@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+			<head>
+				<meta 		charset    = "UTF-8">
+				<meta 		http-equiv = "X-UA-Compatible"    content = "IE=edge">
+				<meta 		name       = "viewport" 		  content = "width=device-width, initial-scale=1.0">
+				<title>      MathOcean          </title>
+				
+				<link       href = "Style_Pantalla_Juego.css"  rel = "stylesheet"  type = "text/css" />
+				<script     src  = "Script_MathOcean.js">	  </script>
+				<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+				
+			</head>
+
+	<body>
+				
+		<!-- Creamos el entorno del juego -->
+		 <a href="index.html" class="btn-regresar">
+      		<img src="imagenes/Boton_Regresar.png" alt="Regresar">
+   		 </a>
+
+			<div class="entornoDelJuego">
+				<div class="hudPanel">
+					<img src="Imagenes/Pergamino_Puntajes.png" class="pergaminoScore">
+						<!-- textos encima del pergamino -->
+						<div class="textoScore">
+                        
+							<span id="idNivel">
+								Nivel: <i id="idNumeroNivel">1</i>
+							</span>
+							
+							<span id="idVidas">
+								Vidas: <i id="idContarVidas">20</i>
+							</span>
+
+							<span id="idPuntajeDeAciertos">
+								Aciertos: <i id="idContarAciertos">0</i>
+							</span>
+
+							<span id="idPuntajeDeErrores">
+								Desaciertos: <i id="idContarErrores">0</i>
+							</span>
+
+							
+
+						</div>
+
+				</div>
+
+				<!-- Burbuja de operación -->
+
+				<div class="burbujaOperacion">
+
+					<img src="Imagenes/Burbuja_Operacion.png" class="imagenBurbujaOperacion">
+
+					<div class="contenidoOperacion">
+
+						<div id="idFormula">
+							Expresión: <i id="idExpresionMatematica"></i>
+						</div>
+
+						<div class="barraContenedor">
+							<meter id="idBarraDeEstado" value="0" min="0" max="100"></meter>
+						</div>
+
+						<div id="idTiempo">
+							Tiempo: <i id="idCronometro">0</i>
+						</div>
+
+					</div>
+
+				</div>
+        
+				<span    id     = "idNave">			</span>
+								
+						<audio   id     = "idSonidoLaser"       		  src    = "Sonidos/disparo.mp3"             >		    </audio>
+						<audio   id     = "idSonidoExplosion"   		  src    = "Sonidos/Explosion_Burbuja_Abajo.mp3"   >	        </audio>				
+						<audio   id     = "idSonidoAsteriodeCorrecto"     src    = "Sonidos/asteroideCorrecto.mp3"  >           </audio>
+						<audio   id     = "idSonidoAsteriodeIncorrecto"   src    = "Sonidos/cc.mp3">       </audio>	
+						<audio   id     = "idSonidoDeFondo"               src    = "Sonidos/Sonido_Juego1.mp3" autoplay loop  >   </audio>	
+						<audio   id     = "idSonidoDeFinDelJuego"         src    = "Sonidos/finDelJuego.mp3"        >           </audio>						
+						<audio   id     = "idSonidoCambioDeNivel"         src    = "Sonidos/sonidoCambioDeNivel.mp3" >           </audio>	
+						
+									
+			</div>
+
+	</body>
+</html>

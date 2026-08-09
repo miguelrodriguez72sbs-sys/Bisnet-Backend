@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>   MathOcean    </title>
+
+    <link  href = "Style_Index.css"   rel = "stylesheet"  type = "text/css" />
+</head>
+
+<body>
+
+    <header style="text-align: center; padding-top: 5px;">
+     <img src="imagenes/Titulo_Tortuguita.png" width="480">
+    </header>
+
+    <a href="Pantalla_Juego.html" class="btn-jugar">
+      <img src="imagenes/Boton_Play.png" alt="Play">
+    </a>
+
+    <a href="Pantalla_Instructions.html" class="btn-Instructions">
+      <img src="imagenes/Boton_Instructions.png" alt="Instructions">
+    </a>
+
+    <audio id="Fondo1" autoplay loop>
+        <source src="Sonidos/Sonido_Fondo_Inicio.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio.
+    </audio>
+
+    <script>
+        const music = document.getElementById("Fondo1");
+        music.volume = 1.0;
+        // Intento de autoplay
+        music.play().catch(() => {
+        // Si el navegador lo bloquea, espera interacción
+        document.addEventListener("click", () => {
+            music.play();
+        }, { once: true });
+        });
+</script>
+ 
+    <script> 
+      alert("Recuerda habilitar los permisos de sonido y video en tu navegador");
+    </script>
+</body>
+</html>
