@@ -134,6 +134,9 @@ class CommunityController extends Controller
             'message'      => $request->message,
         ]);
 
+        // Notificar a los demás miembros en tiempo real (Reverb)
+        broadcast(new \App\Events\CommunityMessageSent($message))->toOthers();
+
         return response()->json($message->load('user'), 201);
     }
 
