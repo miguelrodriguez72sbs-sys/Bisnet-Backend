@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Events\NotificationCreated;
 use App\Models\Community;
 use App\Models\CommunityMember;
 use App\Models\CommunityMessage;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CommunityController extends Controller
 {
@@ -78,6 +81,22 @@ class CommunityController extends Controller
             'status' => $community->type === 'private' ? 'pending' : 'approved',
         ]);
 
+        // Notificar al dueño de la comunidad
+        if ($community->owner_id !== $userId) {
+            $notification = Notification::create([
+                'user_id'      => $community->owner_id,
+                'from_user_id' => $userId,
+                'type'         => 'community_join',
+                'data'         => [
+                    'community_id'   => $community->id,
+                    'community_name' => $community->name,
+                    'approved'       => $community->type === 'public',
+                ],
+            ]);
+
+            broadcast(new NotificationCreated($notification))->toOthers();
+        }
+
         return response()->json([
             'message' => $community->type === 'private'
                 ? 'Solicitud enviada, esperando aprobación'
@@ -136,6 +155,28 @@ class CommunityController extends Controller
 
         // Notificar a los demás miembros en tiempo real (Reverb)
         broadcast(new \App\Events\CommunityMessageSent($message))->toOthers();
+
+        // Crear notificación a los demás miembros aprobados
+        $memberIds = CommunityMember::where('community_id', $id)
+            ->where('status', 'approved')
+            ->where('user_id', '!=', $request->user()->id)
+            ->pluck('user_id');
+
+        foreach ($memberIds as $memberId) {
+            $notification = Notification::create([
+                'user_id'      => $memberId,
+                'from_user_id' => $request->user()->id,
+                'type'         => 'community_message',
+                'data'         => [
+                    'community_id'   => $community->id,
+                    'community_name' => $community->name,
+                    'message_id'     => $message->id,
+                    'preview'        => Str::limit($message->message, 60),
+                ],
+            ]);
+
+            broadcast(new NotificationCreated($notification))->toOthers();
+        }
 
         return response()->json($message->load('user'), 201);
     }
